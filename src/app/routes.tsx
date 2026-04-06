@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
-    children: [
+    children: [ //git checkout
       { index: true, Component: Home },
       { path: "shirts", Component: ShirtsPage },
       { path: "shirts/:subcategory", Component: ShirtsPage },
