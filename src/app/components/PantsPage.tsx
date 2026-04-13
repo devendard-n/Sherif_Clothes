@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { useParams } from "react-router";
+import { useSearchParams } from "react-router-dom"; // ✅ FIXED
 import { supabase } from "../../supabase";
 import { ProductCard } from "./ProductCard";
 import { ProductFilters } from "./ProductFilters";
 import { Product } from "../types/product";
 
-const subcategories = {
+const subcategories: Record<string, string> = {
   jeans: "Jeans",
   formal: "Formal",
   baggy: "Baggy",
@@ -15,13 +15,15 @@ const subcategories = {
 };
 
 export function PantsPage() {
-  const { subcategory } = useParams();
+  // ✅ Read query param (type-safe)
+  const [searchParams] = useSearchParams();
+  const subcategory = searchParams.get("type") as string | null;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedSub, setSelectedSub] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
-  const [selectedColor, setSelectedColor] = useState<string>(""); // ✅ NEW
+  const [selectedColor, setSelectedColor] = useState<string>("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,7 +51,9 @@ export function PantsPage() {
 
   // SUBCATEGORY
   if (selectedSub) {
-    filtered = filtered.filter((p) => p.subcategory === selectedSub);
+    filtered = filtered.filter(
+      (p) => p.subcategory === selectedSub
+    );
   }
 
   // SIZE
@@ -59,26 +63,29 @@ export function PantsPage() {
     );
   }
 
-  // ✅ COLOR (FIXED)
+  // COLOR
   if (selectedColor) {
-  filtered = filtered.filter((p) =>
-    p.colors?.includes(selectedColor)
-  );
-}
+    filtered = filtered.filter((p) =>
+      p.colors?.includes(selectedColor)
+    );
+  }
 
   // PRICE
-  if (priceRange !== "all") {
-    filtered = filtered.filter((p) => {
-      const price = p.offerprice || p.price;
+   if (priceRange !== "all") {
+  filtered = filtered.filter((p) => {
+    const price = p.offerprice || p.price;
 
-      if (priceRange === "under1500") return price < 1500;
-      if (priceRange === "1500-2000")
-        return price >= 1500 && price <= 2000;
-      if (priceRange === "above2000") return price > 2000;
+    if (priceRange === "under1000") return price < 1000;
 
-      return true;
-    });
-  }
+    if (priceRange === "1000-2000")
+      return price >= 1000 && price <= 2000;
+
+    if (priceRange === "above2000") return price > 2000;
+
+    return false; // ✅ IMPORTANT (not true)
+  });
+}
+
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -93,7 +100,7 @@ export function PantsPage() {
           <h1 className="mb-4">
             <span className="text-4xl sm:text-5xl font-black tracking-wider">
               {subcategory
-                ? subcategories[subcategory as keyof typeof subcategories]
+                ? subcategories[subcategory]
                 : "ALL PANTS"}
             </span>
           </h1>
@@ -102,8 +109,9 @@ export function PantsPage() {
           </p>
         </motion.div>
 
-        {/* ✅ FILTERS */}
+        {/* FILTERS */}
         <ProductFilters
+        products={products}
           subcategories={Object.keys(subcategories)}
           selectedSub={selectedSub}
           setSelectedSub={setSelectedSub}
@@ -113,7 +121,6 @@ export function PantsPage() {
           setPriceRange={setPriceRange}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
-          
         />
 
         {/* PRODUCTS */}

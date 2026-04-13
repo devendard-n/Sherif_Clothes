@@ -281,6 +281,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
 
   const [formData, setFormData] = useState(
     product || {
+      description: "",
       name: "",
       category: "shirts",
       subcategory: "",
@@ -407,52 +408,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
           }
           className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
         />
-
-        {/* SIZE STOCK */}
-        <div className="col-span-2 bg-black/20 p-4 rounded-xl space-y-3">
-          <p className="text-sm text-white/70">Size Stock</p>
-          {formData.sizes.map((size: string) => (
-            <div key={size} className="flex items-center gap-4">
-              <span className="w-8 font-semibold">{size}</span>
-
-              <input
-                type="number"
-                placeholder="Stock"
-                value={formData.size_stock?.[size] ?? ""}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    size_stock: {
-                      ...prev.size_stock,
-                      [size]: value,
-                    },
-                  }));
-                }}
-                className="w-24 px-3 py-2 bg-transparent border border-white/20 rounded"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* COLORS */}
-        <div className="col-span-2">
-          <label className="block mb-2 text-sm text-white/70">Colors</label>
-          <input
-            type="text"
-            placeholder="red, blue, black"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                colors: e.target.value.split(",").map((c) => c.trim()),
-              })
-            }
-            className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
-          />
-        </div>
-
-
-        {/* ================= SIZE SECTION ================= */}
+{/* ================= SIZE SECTION ================= */}
         <div className="col-span-2">
 
           <label className="block mb-2 font-medium">
@@ -540,7 +496,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
             {formData.sizes.map((size: string) => (
               <div
                 key={size}
-                className="px-3 py-1 bg-muted rounded flex items-center gap-2"
+                className="px-3 py-1 bg-muted rounded flex items-center gap-2 text-black"
               >
                 {size}
                 <button
@@ -568,6 +524,63 @@ function ProductForm({ product, onSave, onCancel }: any) {
         </div>
         {/* ================= END SIZE SECTION ================= */}
 
+        {/* SIZE STOCK */}
+        <div className="col-span-2 bg-black/20 p-4 rounded-xl space-y-3">
+          <p className="text-sm text-white/70">Size Stock</p>
+          {formData.sizes.map((size: string) => (
+            <div key={size} className="flex items-center gap-4">
+              <span className="w-8 font-semibold">{size}</span>
+
+              <input
+                type="number"
+                placeholder="Stock"
+                value={formData.size_stock?.[size] ?? ""}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    size_stock: {
+                      ...prev.size_stock,
+                      [size]: value,
+                    },
+                  }));
+                }}
+                className="w-24 px-3 py-2 bg-transparent border border-white/20 rounded"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* COLORS */}
+        <div className="col-span-2">
+          <label className="block mb-2 text-sm text-white/70">Colors</label>
+          <input
+            type="text"
+            placeholder="red, blue, black"
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                colors: e.target.value.split(",").map((c) => c.trim()),
+              })
+            }
+            className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
+          />
+        </div>
+
+
+        {/* PRODUCT DISCRIPTION */}
+
+        {/* DESCRIPTION */}
+        <textarea
+          placeholder="Product Description"
+          value={formData.description || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          className="col-span-2 w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
+          rows={3}
+        />
+        
         {/* BADGE + FLAGS */}
         <div className="col-span-2 flex flex-wrap gap-4 items-center">
           <select

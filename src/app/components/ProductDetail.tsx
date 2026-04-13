@@ -51,7 +51,7 @@ Price: ₹${product.offerprice || product.price}
 
 Product Link: ${window.location.href}`;
 
-    window.open(`https://wa.me/9597929428?text=${encodeURIComponent(message)}`);
+    window.open(`https://wa.me/9003091927?text=${encodeURIComponent(message)}`);
   };
 
   return (
@@ -80,6 +80,11 @@ Product Link: ${window.location.href}`;
           {/* INFO */}
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
+            {product.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                {product.description}
+              </p>
+            )}
 
             <div className="my-4 text-xl font-bold">
               {product.offerprice ? (

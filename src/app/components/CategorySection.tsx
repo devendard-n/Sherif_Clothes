@@ -1,3 +1,4 @@
+import { Filter } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate } from "react-router";
 
@@ -6,26 +7,26 @@ export function CategorySection() {
   const navigate = useNavigate();
 
   const categories = [
-    { name: "Shirts", img: "./src/images/logo.jpeg", path: "/shirts" },
-    { name: "Pants", img: "./src/images/logo.jpeg", path: "/pants" },
-    { name: "combos", img: "./src/images/logo.jpeg", path: "/combos" },
-    { name: "tshirts", img: "./src/images/logo.jpeg", path: "/tshirts" },
-    {
-      name: "Baggy Pants",
-      img: "./src/images/kerala-baggy.jpeg",
-      path: "/pants",
-      filter: "baggy",
-    },
+    { name: "Formal Shirts", img: "./src/images/test.jpg", path: "/shirts", filter: "formal" },
+    { name: "Regular Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "regular" },
+    { name: "Oversized Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "oversized" },
+    { name: "Baggy Pants", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "baggy", },
+    { name: "Jeans", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "jeans", },
+    { name: "mom-fit", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "mom-fit", },
+    { name: "cargo", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "cargo", },
+    { name: "Oversized T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "oversized" },
+    { name: "plain T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "plain" },
+    { name: "polo T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "polo" },
+    { name: "full-sleeve T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "full-sleeve" },
   ];
 
   return (
     <section
       id="category-section"
-      className={`py-20 px-6 transition-colors duration-500 ${
-        theme === "dark"
+      className={`py-20 px-6 transition-colors duration-500 ${theme === "dark"
           ? "bg-[var(--luxury-green)] text-white"
           : "bg-gray-100 text-black"
-      }`}
+        }`}
     >
       <div className="flex justify-between items-center mb-12">
         <div>
@@ -63,7 +64,7 @@ export function CategorySection() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
             <div className="absolute bottom-4 left-4">
-              <h3 className="font-semibold text-lg">{cat.name}</h3>
+              <h3 className="font-semibold text-white">{cat.name}</h3>
 
               <span className="text-xs text-[var(--gold)] tracking-wide">
                 SHOP →
