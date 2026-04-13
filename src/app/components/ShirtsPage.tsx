@@ -1,25 +1,28 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { useParams } from "react-router";
+import { useSearchParams } from "react-router-dom"; // ✅ FIXED
 import { supabase } from "../../supabase";
 import { ProductCard } from "./ProductCard";
 import { Product } from "../types/product";
 import { ProductFilters } from "./ProductFilters";
 
-const subcategories = {
-  baggy: "Baggy",
+const subcategories: Record<string, string> = {
   regular: "Regular",
   formal: "Formal",
   oversized: "Oversized",
 };
 
 export function ShirtsPage() {
-  const { subcategory } = useParams();
+  
+
+  // ✅ NEW (same as PantsPage)
+  const [searchParams] = useSearchParams();
+  const subcategory = searchParams.get("type") as string | null;
 
   const [selectedSub, setSelectedSub] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
-  const [selectedColor, setSelectedColor] = useState<string>(""); // ✅ added
+  const [selectedColor, setSelectedColor] = useState<string>("");
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -41,42 +44,39 @@ export function ShirtsPage() {
     };
 
     fetchProducts();
-  }, [subcategory]);
+  }, [subcategory]); // ✅ reacts to ?type=
 
   let filtered = products;
 
-  // ✅ SUBCATEGORY (FIXED)
+  // SUBCATEGORY
   if (selectedSub) {
     filtered = filtered.filter((p) => p.subcategory === selectedSub);
   }
 
-  // ✅ SIZE
-  if (selectedSize !== "all") {
+  // SIZE
+ if (selectedSize !== "all") {
     filtered = filtered.filter((p) =>
-      p.sizes?.includes(selectedSize.toUpperCase())
+      p.sizes?.includes(selectedSize)
     );
   }
 
-  // ✅ COLOR (FIXED)
-  if (selectedColor) {
-    filtered = filtered.filter((p) =>
-      p.colors?.includes(selectedColor)
-    );
-  }
 
-  // ✅ PRICE
+
+  // PRICE
   if (priceRange !== "all") {
-    filtered = filtered.filter((p) => {
-      const price = p.offerprice || p.price;
+  filtered = filtered.filter((p) => {
+    const price = p.offerprice || p.price;
 
-      if (priceRange === "under1000") return price < 1000;
-      if (priceRange === "1000-1500")
-        return price >= 1000 && price <= 1500;
-      if (priceRange === "above1500") return price > 1500;
+    if (priceRange === "under1000") return price < 1000;
 
-      return true;
-    });
-  }
+    if (priceRange === "1000-2000")
+      return price >= 1000 && price <= 2000;
+
+    if (priceRange === "above2000") return price > 2000;
+
+    return false; // ✅ IMPORTANT (not true)
+  });
+}
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -100,9 +100,9 @@ export function ShirtsPage() {
           </p>
         </motion.div>
 
-        {/* ✅ FILTERS */}
+        {/* FILTERS */}
         <ProductFilters
-          products={products} // ✅ REQUIRED
+          products={products}
           subcategories={Object.keys(subcategories)}
           selectedSub={selectedSub}
           setSelectedSub={setSelectedSub}
@@ -110,8 +110,8 @@ export function ShirtsPage() {
           setSelectedSize={setSelectedSize}
           priceRange={priceRange}
           setPriceRange={setPriceRange}
-          selectedColor={selectedColor} // ✅ added
-          setSelectedColor={setSelectedColor} // ✅ added
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
         />
 
         {/* PRODUCTS */}

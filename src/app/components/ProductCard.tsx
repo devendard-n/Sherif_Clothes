@@ -71,6 +71,11 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-lg font-bold line-clamp-1">
               {product.name}
             </span>
+            {product.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                {product.description}
+              </p>
+            )}
           </h3>
 
           <div className="flex items-center space-x-3 mb-4">

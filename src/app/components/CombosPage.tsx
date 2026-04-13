@@ -4,11 +4,26 @@ import { supabase } from "../../supabase";
 import { ProductCard } from "./ProductCard";
 import { Package } from "lucide-react";
 import { Product } from "../types/product";
-import { ProductFilters } from "./ProductFilters"; // ✅ CORRECT
+import { ProductFilters } from "./ProductFilters";
+import { useSearchParams } from "react-router-dom"; // ✅ ADDED
 
 export function CombosPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
+  const [selectedSize, setSelectedSize] = useState<string>("all");
+  const [priceRange, setPriceRange] = useState<string>("all");
+  const [selectedColor, setSelectedColor] = useState<string>("");
+
+  // ✅ NEW: subcategory state
+  const [selectedSub, setSelectedSub] = useState<string>("");
+
+  // ✅ NEW: subcategories
+  const subcategories = ["summer", "winter"];
+
+  // ✅ NEW: read URL param
+  const [searchParams] = useSearchParams();
+  const subcategoryParam = searchParams.get("type");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,44 +42,64 @@ export function CombosPage() {
     fetchProducts();
   }, []);
 
+  // ✅ APPLY URL FILTER
+  useEffect(() => {
+    if (subcategoryParam) {
+      setSelectedSub(subcategoryParam);
+    }
+  }, [subcategoryParam]);
+
   // ✅ FILTER LOGIC
-  const handleFilterChange = (filters: any) => {
-    let result = [...products];
+  useEffect(() => {
+    let filtered = products;
 
-    if (filters.subcategory) {
-      result = result.filter(
-        (p: any) => p.subcategory === filters.subcategory
+    // ✅ SUBCATEGORY
+    if (selectedSub) {
+      filtered = filtered.filter(
+        (p) =>
+          p.subcategory?.toLowerCase() ===
+          selectedSub.toLowerCase()
       );
     }
 
-    if (filters.color) {
-      result = result.filter(
-        (p: any) => p.color === filters.color
+    // SIZE
+    if (selectedSize && selectedSize !== "all") {
+      filtered = filtered.filter((p) =>
+        p.sizes?.some(
+          (s: string) =>
+            s.toLowerCase() === selectedSize.toLowerCase()
+        )
       );
     }
 
-    if (filters.size) {
-      result = result.filter(
-        (p: any) => p.size === filters.size
+    // PRICE
+    if (priceRange !== "all") {
+      filtered = filtered.filter((p) => {
+        const price = Number(p.offerprice || p.price);
+
+        if (priceRange === "under1000") return price < 1000;
+
+        if (priceRange === "1000-2000")
+          return price >= 1000 && price <= 2000;
+
+        if (priceRange === "above2000") return price > 2000;
+
+        return false;
+      });
+    }
+
+    // COLOR
+    if (selectedColor) {
+      filtered = filtered.filter((p) =>
+        p.colors?.some(
+          (c: string) =>
+            c.toLowerCase() === selectedColor.toLowerCase()
+        )
       );
     }
 
-    if (filters.price === "low") {
-      result = result.filter((p: any) => p.price < 500);
-    }
-
-    if (filters.price === "mid") {
-      result = result.filter(
-        (p: any) => p.price >= 500 && p.price <= 1000
-      );
-    }
-
-    if (filters.price === "high") {
-      result = result.filter((p: any) => p.price > 1000);
-    }
-
-    setFilteredProducts(result);
-  };
+    setFilteredProducts(filtered);
+  }, [products, selectedSize, priceRange, selectedColor, selectedSub]);
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -92,8 +127,19 @@ export function CombosPage() {
           </p>
         </motion.div>
 
-        {/* ✅ FILTER */}
-        <ProductFilters onFilterChange={handleFilterChange} />
+        {/* FILTER */}
+        <ProductFilters  
+          products={products}
+          subcategories={subcategories}        // ✅ ADDED
+          selectedSub={selectedSub}            // ✅ ADDED
+          setSelectedSub={setSelectedSub}      // ✅ ADDED
+          selectedSize={selectedSize}
+          setSelectedSize={setSelectedSize}
+          priceRange={priceRange} 
+          setPriceRange={setPriceRange}
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
+        />
 
         {/* PRODUCTS */}
         {filteredProducts.length > 0 ? (

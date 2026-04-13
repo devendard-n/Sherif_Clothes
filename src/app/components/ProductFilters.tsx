@@ -13,10 +13,22 @@ export function ProductFilters({
   setSelectedColor,
 }: any) {
 
-  const availableSizes = Array.from(
+  // ✅ Detect size type (hip vs S/M/L)
+  const availableSizes: string[] = Array.from(
     new Set(
-      (products || []).flatMap((p: any) => p.sizes || [])
+      (products || [])
+        .flatMap((p: any) => {
+          if (Array.isArray(p.sizes)) return p.sizes;
+          if (typeof p.sizes === "string") return p.sizes.split(",");
+          return [];
+        })
+        .map((s: string) => s.toUpperCase().trim())
     )
+  );
+
+  // ✅ Detect if numeric sizes (pants)
+  const isNumericSize = availableSizes.every((s) =>
+    !isNaN(Number(s))
   );
 
   return (
@@ -30,10 +42,11 @@ export function ProductFilters({
             onClick={() =>
               setSelectedSub(selectedSub === sub ? "" : sub)
             }
-            className={`px-6 py-3 border-2 rounded-lg font-bold transition ${selectedSub === sub
-              ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-              : "border-[var(--gold)] text-[var(--gold)]"
-              }`}
+            className={`px-6 py-3 border-2 rounded-lg font-bold transition ${
+              selectedSub === sub
+                ? "bg-[var(--gold)] text-[var(--luxury-green)]"
+                : "border-[var(--gold)] text-[var(--gold)]"
+            }`}
           >
             {sub}
           </button>
@@ -50,12 +63,22 @@ export function ProductFilters({
             onChange={(e) => setSelectedSize(e.target.value)}
             className="appearance-none px-6 py-3 pr-12 border-2 border-[var(--gold)] rounded-lg bg-transparent min-w-[160px] font-medium"
           >
-            <option value="all" className="bg-black text-base text-white">All Sizes</option>
-            <option value="S" className="bg-black text-base text-white">S</option>
-            <option value="M" className="bg-black text-base text-white">M</option>
-            <option value="L" className="bg-black text-base text-white">L</option>
-            <option value="XL" className="bg-black text-base text-white">XL</option>
+            <option value="all" className="bg-black text-base text-white">
+              {isNumericSize ? "All Sizes" : "All Sizes"}
+            </option>
+
+            {availableSizes.map((size) => (
+              <option
+                key={size}
+                value={size}
+                className="bg-black text-base text-white"
+              >
+                {/* ✅ Format display */}
+                {isNumericSize ? `${size}` : size}
+              </option>
+            ))}
           </select>
+
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
         </div>
 
@@ -66,14 +89,22 @@ export function ProductFilters({
             onChange={(e) => setPriceRange(e.target.value)}
             className="appearance-none px-6 py-3 border-2 border-[var(--gold)] rounded-lg"
           >
-            <option value="all" className="bg-black text-base text-white">All Prices</option>
-            <option value="under1000" className="bg-black text-base text-white">Under ₹1000</option>
-            <option value="1000-2000" className="bg-black text-base text-white">₹1000 - ₹2000</option>
-            <option value="above2000" className="bg-black text-base text-white">Above ₹2000</option>
+            <option value="all" className="bg-black text-base text-white">
+              All Prices
+            </option>
+            <option value="under1000" className="bg-black text-base text-white">
+              Under ₹1000
+            </option>
+            <option value="1000-2000" className="bg-black text-base text-white">
+              ₹1000 - ₹2000
+            </option>
+            <option value="above2000" className="bg-black text-base text-white">
+              Above ₹2000
+            </option>
           </select>
+
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 pointer-events-none" />
         </div>
-
 
         {/* CLEAR FILTER BUTTON */}
         <button
