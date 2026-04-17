@@ -54,6 +54,23 @@ Product Link: ${window.location.href}`;
     window.open(`https://wa.me/9003091927?text=${encodeURIComponent(message)}`);
   };
 
+  // Size Stock check
+  const getStock = () => {
+    if (!selectedSize) return null;
+    return product.size_stock?.[selectedSize] ?? 0;
+  };
+
+  // Color Stock check
+
+  const getColorStock = () => {
+    if (!selectedColor) return null;
+    return product.color_stock?.[selectedColor] ?? 0;
+  };
+
+  const colorStock = getColorStock();
+
+  const stock = getStock();
+
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -71,10 +88,24 @@ Product Link: ${window.location.href}`;
 
           {/* IMAGE */}
           <div>
-            <img
-              src={product.images?.[selectedImage]}
-              className="w-full rounded-lg"
-            />
+            <div>
+              <img
+                src={product.images?.[selectedImage]}
+                className="w-full rounded-lg mb-4"
+              />
+
+              <div className="flex gap-2 flex-wrap">
+                {product.images?.map((img: string, index: number) => (
+                  <img
+                    key={index}
+                    src={img}
+                    onClick={() => setSelectedImage(index)}
+                    className={`w-16 h-16 cursor-pointer border ${selectedImage === index ? "border-yellow-500" : ""
+                      }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* INFO */}
@@ -109,11 +140,10 @@ Product Link: ${window.location.href}`;
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-lg transition ${
-                        selectedSize === size
-                          ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-                          : "hover:bg-muted"
-                      }`}
+                      className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
+                        ? "bg-[var(--gold)] text-[var(--luxury-green)]"
+                        : "hover:bg-muted"
+                        }`}
                     >
                       {size}
                     </button>
@@ -132,16 +162,44 @@ Product Link: ${window.location.href}`;
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-lg transition ${
-                        selectedColor === color
-                          ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-                          : "hover:bg-muted"
-                      }`}
+                      className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
+                        ? "bg-[var(--gold)] text-[var(--luxury-green)]"
+                        : "hover:bg-muted"
+                        }`}
                     >
                       {color}
                     </button>
                   ))}
                 </div>
+                {colorStock !== null && (
+                  <div className="mt-4 font-semibold">
+                    {colorStock === 0 ? (
+                      <span className="text-red-500">Out of Stock</span>
+                    ) : colorStock <= 5 ? (
+                      <span className="text-orange-500">
+                        Only {colorStock} left
+                      </span>
+                    ) : (
+                      <span className="text-green-500">In Stock</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* stock */}
+
+            {stock !== null && (
+              <div className="mt-4 font-semibold">
+                {stock === 0 ? (
+                  <span className="text-red-500">Out of Stock</span>
+                ) : stock <= 5 ? (
+                  <span className="text-orange-500">
+                    Only {stock} left
+                  </span>
+                ) : (
+                  <span className="text-green-500">In Stock</span>
+                )}
               </div>
             )}
 

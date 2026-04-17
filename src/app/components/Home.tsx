@@ -21,7 +21,7 @@ export function Home() {
 
   const slides = [
     { type: "video", src: "./src/videos/bg.mp4" },
-    { type: "image", src: "./src/images/test3.jpeg" },
+    { type: "image", src: "./src/images/home.jpeg" },
   ];
 
   useEffect(() => {
