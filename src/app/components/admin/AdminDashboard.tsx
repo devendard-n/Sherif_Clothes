@@ -294,6 +294,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
       colors: [],
       sizes: [],
       size_stock: {},
+      color_stock: {},
     }
   );
 
@@ -307,31 +308,32 @@ function ProductForm({ product, onSave, onCancel }: any) {
   };
 
   const handleImageUpload = async (e: any) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files) return;
 
     setUploading(true);
 
-    const fileName = `${Date.now()}-${file.name}`;
+    let urls: string[] = [];
 
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, file);
+    for (let file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
 
-    if (error) {
-      alert("Upload failed");
-      console.error(error);
-      setUploading(false);
-      return;
+      const { error } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, file);
+
+      if (!error) {
+        const { data } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(fileName);
+
+        urls.push(data.publicUrl);
+      }
     }
-
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
 
     setFormData({
       ...formData,
-      images: [data.publicUrl],
+      images: [...formData.images, ...urls], // ✅ append images
     });
 
     setUploading(false);
@@ -408,7 +410,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
           }
           className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
         />
-{/* ================= SIZE SECTION ================= */}
+        {/* ================= SIZE SECTION ================= */}
         <div className="col-span-2">
 
           <label className="block mb-2 font-medium">
@@ -552,19 +554,31 @@ function ProductForm({ product, onSave, onCancel }: any) {
         </div>
 
         {/* COLORS */}
-        <div className="col-span-2">
-          <label className="block mb-2 text-sm text-white/70">Colors</label>
-          <input
-            type="text"
-            placeholder="red, blue, black"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                colors: e.target.value.split(",").map((c) => c.trim()),
-              })
-            }
-            className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
-          />
+        <div className="col-span-2 bg-black/20 p-4 rounded-xl space-y-3">
+          <p className="text-sm text-white/70">Color Stock</p>
+
+          {formData.colors.map((color: string) => (
+            <div key={color} className="flex items-center gap-4">
+              <span className="w-20 font-semibold">{color}</span>
+
+              <input
+                type="number"
+                value={formData.color_stock?.[color] ?? 0}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    color_stock: {
+                      ...prev.color_stock,
+                      [color]: value,
+                    },
+                  }));
+                }}
+                className="w-24 px-3 py-2 bg-transparent border border-white/20 rounded"
+              />
+            </div>
+          ))}
         </div>
 
 
@@ -580,7 +594,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
           className="col-span-2 w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
           rows={3}
         />
-        
+
         {/* BADGE + FLAGS */}
         <div className="col-span-2 flex flex-wrap gap-4 items-center">
           <select
@@ -646,6 +660,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
           <label className="block mb-2 text-sm text-white/70">Product Image</label>
           <input
             type="file"
+            multiple
             onChange={handleImageUpload}
             className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg"
           />
