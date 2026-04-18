@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { motion, AnimatePresence } from "motion/react";
-import { logo} from "../../images/images.ts";
+import { logo} from "../../../public/images/images.ts";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
