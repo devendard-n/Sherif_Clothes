@@ -20,9 +20,9 @@ export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
-    { type: "video", src: "../../../public/videos/bg.mp4" },
-    { type: "image", src: "../../../public/images/home.jpeg" },
-  ];
+  { type: "video", src: "/videos/bg.mp4" },
+  { type: "image", src: "/images/home.jpeg" },
+];
 
   useEffect(() => {
     fetchProducts();
