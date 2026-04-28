@@ -128,14 +128,14 @@ export function CombosPage() {
         </motion.div>
 
         {/* FILTER */}
-        <ProductFilters  
+        <ProductFilters
           products={products}
           subcategories={subcategories}        // ✅ ADDED
           selectedSub={selectedSub}            // ✅ ADDED
           setSelectedSub={setSelectedSub}      // ✅ ADDED
           selectedSize={selectedSize}
           setSelectedSize={setSelectedSize}
-          priceRange={priceRange} 
+          priceRange={priceRange}
           setPriceRange={setPriceRange}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
@@ -143,13 +143,13 @@ export function CombosPage() {
 
         {/* PRODUCTS */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {filteredProducts.map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
               >
                 <ProductCard product={product} />
               </motion.div>
@@ -157,7 +157,7 @@ export function CombosPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-2xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground">
               No combo offers available at the moment
             </p>
           </div>

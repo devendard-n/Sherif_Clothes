@@ -6,7 +6,7 @@ import { ProductFilters } from "./ProductFilters";
 import { useSearchParams } from "react-router-dom";
 
 const subcategories: Record<string, string> = {
-  oversized: "Oversized",
+  "Drop-shoulder": "Drop-shoulder",
   plain: "Plain",
   polo: "Polo",
   "full-sleeve": "Full Sleeve",
@@ -63,12 +63,12 @@ export function TShirtPage() {
       );
     }
 
-// SIZE
-  if (selectedSize) {
-    filtered = filtered.filter((p) =>
-      p.sizes?.includes(selectedSize.toUpperCase())
-    );
-  }
+    // SIZE
+    if (selectedSize) {
+      filtered = filtered.filter((p) =>
+        p.sizes?.includes(selectedSize.toUpperCase())
+      );
+    }
 
 
     // PRICE
@@ -110,7 +110,7 @@ export function TShirtPage() {
 
         {/* FILTER */}
         <ProductFilters
-        products={products}
+          products={products}
           subcategories={Object.keys(subcategories)}
           selectedSub={selectedSub}
           setSelectedSub={setSelectedSub}
@@ -124,7 +124,7 @@ export function TShirtPage() {
 
         {/* PRODUCTS */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {filteredProducts.map((product) => (
               <motion.div key={product.id}>
                 <ProductCard product={product} />
@@ -133,7 +133,7 @@ export function TShirtPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-2xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground">
               No T-Shirts Found
             </p>
           </div>

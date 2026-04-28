@@ -20,9 +20,9 @@ export function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
-  { type: "video", src: "/videos/bg.mp4" },
-  { type: "image", src: "/images/home.jpeg" },
-];
+    { type: "video", src: "/videos/bg.mp4" },
+    { type: "image", src: "/images/home.jpeg" },
+  ];
 
   useEffect(() => {
     fetchProducts();
@@ -80,8 +80,8 @@ export function Home() {
   return (
     <div
       className={`min-h-screen transition-colors duration-500 ${theme === "dark"
-          ? "bg-[var(--luxury-green)] text-white"
-          : "bg-white text-black"
+        ? "bg-[var(--luxury-green)] text-white"
+        : "bg-white text-black"
         }`}
     >
 
@@ -116,8 +116,8 @@ export function Home() {
               {/* ✅ THEME BASED OVERLAY */}
               <div
                 className={`absolute inset-0 ${theme === "dark"
-                    ? "bg-gradient-to-r from-[var(--luxury-green)]/95 via-[var(--luxury-green)]/80 to-transparent"
-                    : "bg-gradient-to-r from-white/80 via-white/50 to-transparent"
+                  ? "bg-gradient-to-r from-[var(--luxury-green)]/95 via-[var(--luxury-green)]/80 to-transparent"
+                  : "bg-gradient-to-r from-white/80 via-white/50 to-transparent"
                   }`}
               ></div>
             </div>
@@ -167,10 +167,10 @@ export function Home() {
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`w-3 h-3 rounded-full ${currentSlide === index
-                  ? "bg-[var(--gold)]"
-                  : theme === "dark"
-                    ? "bg-white/50"
-                    : "bg-black/40"
+                ? "bg-[var(--gold)]"
+                : theme === "dark"
+                  ? "bg-white/50"
+                  : "bg-black/40"
                 }`}
             />
           ))}
@@ -184,29 +184,38 @@ export function Home() {
           <h2 className="text-4xl font-black">LIMITED TIME OFFERS</h2>
         </div>
 
-        <div className="relative overflow-hidden">
-          <div ref={scrollRef} className="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 px-4 overflow-x-auto">
+        <div className="px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {offerProducts.map((product, index) => (
-              <div key={`${product.id}-${index}`} className="w-full md:w-80">
+              <div key={`${product.id}-${index}`} className="w-full">
                 <Link to={`/product/${product.id}`}>
                   <img
                     src={product.images?.[0]}
-                    className="h-80 w-full object-cover"
+                    className="w-full h-56 md:h-80 object-cover rounded-xl"
                   />
 
-                  <div>
-                    <h3>{product.name}</h3>
+                  <div className="mt-2">
+                    <h3 className="text-sm md:text-base line-clamp-2">
+                      {product.name}
+                    </h3>
 
-                    {product.offerprice && (
-                      <>
-                        <span className="text-lg font-bold text-[var(--gold)]">
-                          ₹{product.offerprice}
-                        </span>
-                        <span className="line-through">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {product.offerprice ? (
+                        <>
+                          <span className="text-lg font-bold text-[var(--gold)]">
+                            ₹{product.offerprice}
+                          </span>
+
+                          <span className="line-through text-gray-400 text-sm">
+                            ₹{product.price}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-lg font-bold">
                           ₹{product.price}
                         </span>
-                      </>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </Link>
               </div>

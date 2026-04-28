@@ -37,23 +37,34 @@ export function ProductDetail() {
   }
 
   const handleOrderWhatsApp = () => {
-    if (!selectedSize || !selectedColor) {
-      alert("Please select size and color");
+    const hasSizes = product.sizes?.length > 0;
+    const hasColors = product.colors?.length > 0;
+
+    // If admin added sizes, user must select size
+    if (hasSizes && !selectedSize) {
+      alert("Please select size");
+      return;
+    }
+
+    // If admin added colors, user must select color
+    if (hasColors && !selectedColor) {
+      alert("Please select color");
       return;
     }
 
     const message = `Hi! I'd like to order:
 
 Product: ${product.name}
-Size: ${selectedSize}
-Color: ${selectedColor}
+${hasSizes ? `Size: ${selectedSize}` : ""}
+${hasColors ? `Color: ${selectedColor}` : ""}
 Price: ₹${product.offerprice || product.price}
 
 Product Link: ${window.location.href}`;
 
-    window.open(`https://wa.me/9003091927?text=${encodeURIComponent(message)}`);
+    window.open(
+      `https://wa.me/9003091927?text=${encodeURIComponent(message)}`
+    );
   };
-
   // Size Stock check
   const getStock = () => {
     if (!selectedSize) return null;

@@ -8,13 +8,13 @@ export function CategorySection() {
 
   const categories = [
     { name: "Formal Shirts", img: "./src/images/test.jpg", path: "/shirts", filter: "formal" },
-    { name: "Regular Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "regular" },
-    { name: "Oversized Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "oversized" },
-    { name: "Baggy Pants", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "baggy", },
-    { name: "Jeans", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "jeans", },
-    { name: "mom-fit", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "mom-fit", },
-    { name: "cargo", img: "./src/images/kerala-baggy.jpeg", path: "/pants",  filter: "cargo", },
-    { name: "Oversized T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "oversized" },
+    { name: "unique Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "unique" },
+    { name: "Drop-shoulder Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "Drop-shoulder" },
+    { name: "Baggy Pants", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "baggy", },
+    { name: "Jeans", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "jeans", },
+    { name: "mom-fit", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "mom-fit", },
+    { name: "cargo", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "cargo", },
+    { name: "Drop-shoulder T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "Drop-shoulder" },
     { name: "plain T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "plain" },
     { name: "polo T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "polo" },
     { name: "full-sleeve T-Shirts", img: "./src/images/logo.jpeg", path: "/tshirts", filter: "full-sleeve" },
@@ -24,8 +24,8 @@ export function CategorySection() {
     <section
       id="category-section"
       className={`py-20 px-6 transition-colors duration-500 ${theme === "dark"
-          ? "bg-[var(--luxury-green)] text-white"
-          : "bg-gray-100 text-black"
+        ? "bg-[var(--luxury-green)] text-white"
+        : "bg-gray-100 text-black"
         }`}
     >
       <div className="flex justify-between items-center mb-12">
