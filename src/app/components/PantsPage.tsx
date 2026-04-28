@@ -105,7 +105,7 @@ export function PantsPage() {
             </span>
           </h1>
           <p className="text-muted-foreground">
-            Explore our premium range of men's pants and trousers
+            Explore our premium range of men's pants
           </p>
         </motion.div>
 
@@ -135,7 +135,7 @@ export function PantsPage() {
         ) : (
           <div className="text-center py-20">
             <p className="text-xl text-muted-foreground">
-              No products found with the selected filters
+              No products found 
             </p>
           </div>
         )}
