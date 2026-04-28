@@ -10,6 +10,7 @@ const subcategories: Record<string, string> = {
   unique: "unique",
   formal: "Formal",
   "Drop-shoulder": "Drop-shoulder",
+  baggy: "Baggy",
 };
 
 export function ShirtsPage() {
