@@ -147,18 +147,30 @@ Product Link: ${window.location.href}`;
                 <h3 className="mb-2 font-semibold">Select Size</h3>
 
                 <div className="flex gap-2 flex-wrap">
-                  {product.sizes.map((size: string) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-lg transition ${selectedSize === size
-                        ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-                        : "hover:bg-muted"
-                        }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {product.sizes.map((size: string) => {
+                    const qty = product.size_stock?.[size] ?? 0;
+                    const isOut = qty === 0;
+
+                    return (
+                      <button
+                        key={size}
+                        disabled={isOut}
+                        onClick={() => !isOut && setSelectedSize(size)}
+                        className={`px-4 py-2 border rounded-lg transition
+              ${selectedSize === size
+                            ? "bg-[var(--gold)] text-[var(--luxury-green)]"
+                            : ""
+                          }
+              ${isOut
+                            ? "opacity-50 cursor-not-allowed line-through"
+                            : "hover:bg-muted"
+                          }
+            `}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -169,32 +181,31 @@ Product Link: ${window.location.href}`;
                 <h3 className="mb-2 font-semibold">Select Color</h3>
 
                 <div className="flex gap-2 flex-wrap">
-                  {product.colors.map((color: string) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-lg transition ${selectedColor === color
-                        ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-                        : "hover:bg-muted"
-                        }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                  {product.colors.map((color: string) => {
+                    const qty = product.color_stock?.[color] ?? 0;
+                    const isOut = qty === 0;
+
+                    return (
+                      <button
+                        key={color}
+                        disabled={isOut}
+                        onClick={() => !isOut && setSelectedColor(color)}
+                        className={`px-4 py-2 border rounded-lg transition
+              ${selectedColor === color
+                            ? "bg-[var(--gold)] text-[var(--luxury-green)]"
+                            : ""
+                          }
+              ${isOut
+                            ? "opacity-50 cursor-not-allowed line-through"
+                            : "hover:bg-muted"
+                          }
+            `}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
                 </div>
-                {colorStock !== null && (
-                  <div className="mt-4 font-semibold">
-                    {colorStock === 0 ? (
-                      <span className="text-red-500">Out of Stock</span>
-                    ) : colorStock <= 5 ? (
-                      <span className="text-orange-500">
-                        Only {colorStock} left
-                      </span>
-                    ) : (
-                      <span className="text-green-500">In Stock</span>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 

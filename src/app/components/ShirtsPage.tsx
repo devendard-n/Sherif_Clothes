@@ -9,8 +9,8 @@ import { ProductFilters } from "./ProductFilters";
 const subcategories: Record<string, string> = {
   unique: "unique",
   formal: "Formal",
-  "Drop-shoulder": "Drop-shoulder",
   baggy: "Baggy",
+  "Drop-shoulder": "Drop-shoulder",
 };
 
 export function ShirtsPage() {
@@ -132,7 +132,7 @@ export function ShirtsPage() {
         ) : (
           <div className="text-center py-20">
             <p className="text-xl text-muted-foreground">
-              No products found with the selected filters
+              No products found 
             </p>
           </div>
         )}

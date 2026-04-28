@@ -10,6 +10,7 @@ export function CategorySection() {
     { name: "Formal Shirts", img: "./src/images/test.jpg", path: "/shirts", filter: "formal" },
     { name: "unique Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "unique" },
     { name: "Drop-shoulder Shirts", img: "./src/images/logo.jpeg", path: "/shirts", filter: "Drop-shoulder" },
+    { name: "Baggy Shirts", img: "./src/images/test.jpg", path: "/shirts", filter: "baggy" },
     { name: "Baggy Pants", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "baggy", },
     { name: "Jeans", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "jeans", },
     { name: "mom-fit", img: "./src/images/kerala-baggy.jpeg", path: "/pants", filter: "mom-fit", },

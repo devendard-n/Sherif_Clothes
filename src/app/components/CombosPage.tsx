@@ -158,7 +158,7 @@ export function CombosPage() {
         ) : (
           <div className="text-center py-20">
             <p className="text-xl text-muted-foreground">
-              No combo offers available at the moment
+              No combo offers 
             </p>
           </div>
         )}
