@@ -51,7 +51,7 @@ export function Navbar() {
                 SHERIF
               </span>
             </div>
-            <span className="hidden sm:inline text-sm tracking-widest text-muted-foreground">
+            <span className="sm:inline text-sm tracking-widest text-muted-foreground">
               CLOTHVIBEZ
             </span>
           </Link>

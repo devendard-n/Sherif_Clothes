@@ -31,7 +31,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    return prefersDark ? "dark" : "light";
+    return "dark";
   });
 
   useEffect(() => {

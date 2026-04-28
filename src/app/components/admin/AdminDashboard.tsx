@@ -287,7 +287,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
       subcategory: "",
       price: 0,
       stock: 0,
-      images: [""],
+      images: [],
       is_featured: false,
       is_trending: false,
       badge: "",
@@ -301,10 +301,10 @@ function ProductForm({ product, onSave, onCancel }: any) {
   const [uploading, setUploading] = useState(false);
 
   const subcategories: any = {
-    shirts: ["baggy", "oversized", "formal", "regular"],
+    shirts: ["baggy", "Drop-shoulder", "formal", "unique"],
     pants: ["jeans", "cargo", "formal", "baggy", "mom-fit"],
     combos: ["summer", "winter"],
-    tshirts: ["oversized", "graphic", "plain", "polo", "full-sleeve"],
+    tshirts: ["Drop-shoulder", "graphic", "plain", "polo", "full-sleeve"],
   };
 
   const handleImageUpload = async (e: any) => {
@@ -553,109 +553,109 @@ function ProductForm({ product, onSave, onCancel }: any) {
           ))}
         </div>
         {/* ================= COLOR SECTION ================= */}
-<div className="col-span-2">
+        <div className="col-span-2">
 
-  <label className="block mb-2 font-medium">
-    Add Colors
-  </label>
+          <label className="block mb-2 font-medium">
+            Add Colors
+          </label>
 
-  {/* INPUT */}
-  <div className="flex gap-2 mb-3">
-    <input
-      type="text"
-      placeholder="Enter color (Red)"
-      id="colorInput"
-      className="px-4 py-2 border rounded w-full text-white"
-    />
+          {/* INPUT */}
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              placeholder="Enter color (Red)"
+              id="colorInput"
+              className="px-4 py-2 border rounded w-full text-white"
+            />
 
-    <button
-      type="button"
-      onClick={() => {
-        const input: any = document.getElementById("colorInput");
-        const value = input.value.trim();
+            <button
+              type="button"
+              onClick={() => {
+                const input: any = document.getElementById("colorInput");
+                const value = input.value.trim();
 
-        if (!value) return;
+                if (!value) return;
 
-        if (!formData.colors.includes(value)) {
-          setFormData({
-            ...formData,
-            colors: [...formData.colors, value],
-            color_stock: {
-              ...formData.color_stock,
-              [value]: formData.color_stock?.[value] || 0,
-            },
-          });
-        }
+                if (!formData.colors.includes(value)) {
+                  setFormData({
+                    ...formData,
+                    colors: [...formData.colors, value],
+                    color_stock: {
+                      ...formData.color_stock,
+                      [value]: formData.color_stock?.[value] || 0,
+                    },
+                  });
+                }
 
-        input.value = "";
-      }}
-      className="px-4 bg-[var(--gold)] rounded text-black"
-    >
-      Add
-    </button>
-  </div>
+                input.value = "";
+              }}
+              className="px-4 bg-[var(--gold)] rounded text-black"
+            >
+              Add
+            </button>
+          </div>
 
-  {/* COLOR TAGS */}
-  <div className="flex gap-2 flex-wrap mb-4">
-    {formData.colors.map((color: string) => (
-      <div
-        key={color}
-        className="px-3 py-1 bg-white text-black rounded flex items-center gap-2"
-      >
-        {color}
+          {/* COLOR TAGS */}
+          <div className="flex gap-2 flex-wrap mb-4">
+            {formData.colors.map((color: string) => (
+              <div
+                key={color}
+                className="px-3 py-1 bg-white text-black rounded flex items-center gap-2"
+              >
+                {color}
 
-        <button
-          onClick={() => {
-            const updated = formData.colors.filter(
-              (c: string) => c !== color
-            );
+                <button
+                  onClick={() => {
+                    const updated = formData.colors.filter(
+                      (c: string) => c !== color
+                    );
 
-            const updatedStock = { ...formData.color_stock };
-            delete updatedStock[color];
+                    const updatedStock = { ...formData.color_stock };
+                    delete updatedStock[color];
 
-            setFormData({
-              ...formData,
-              colors: updated,
-              color_stock: updatedStock,
-            });
-          }}
-        >
-          ❌
-        </button>
-      </div>
-    ))}
-  </div>
+                    setFormData({
+                      ...formData,
+                      colors: updated,
+                      color_stock: updatedStock,
+                    });
+                  }}
+                >
+                  ❌
+                </button>
+              </div>
+            ))}
+          </div>
 
-  {/* COLOR STOCK */}
-  <div className="bg-black/20 p-4 rounded-xl space-y-3">
-    <p className="text-sm text-white/70">Color Stock</p>
+          {/* COLOR STOCK */}
+          <div className="bg-black/20 p-4 rounded-xl space-y-3">
+            <p className="text-sm text-white/70">Color Stock</p>
 
-    {formData.colors.map((color: string) => (
-      <div key={color} className="flex items-center gap-4">
-        <span className="w-20 font-semibold">{color}</span>
+            {formData.colors.map((color: string) => (
+              <div key={color} className="flex items-center gap-4">
+                <span className="w-20 font-semibold">{color}</span>
 
-        <input
-          type="number"
-          placeholder="Stock"
-          value={formData.color_stock?.[color] ?? ""}
-          onChange={(e) => {
-            const value = Number(e.target.value);
+                <input
+                  type="number"
+                  placeholder="Stock"
+                  value={formData.color_stock?.[color] ?? ""}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
 
-            setFormData((prev: any) => ({
-              ...prev,
-              color_stock: {
-                ...prev.color_stock,
-                [color]: value,
-              },
-            }));
-          }}
-          className="w-24 px-3 py-2 bg-transparent border border-white/20 rounded"
-        />
-      </div>
-    ))}
-  </div>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      color_stock: {
+                        ...prev.color_stock,
+                        [color]: value,
+                      },
+                    }));
+                  }}
+                  className="w-24 px-3 py-2 bg-transparent border border-white/20 rounded"
+                />
+              </div>
+            ))}
+          </div>
 
-</div>
+        </div>
         {/* PRODUCT DISCRIPTION */}
 
         {/* DESCRIPTION */}

@@ -7,13 +7,13 @@ import { Product } from "../types/product";
 import { ProductFilters } from "./ProductFilters";
 
 const subcategories: Record<string, string> = {
-  regular: "Regular",
+  unique: "unique",
   formal: "Formal",
-  oversized: "Oversized",
+  "Drop-shoulder": "Drop-shoulder",
 };
 
 export function ShirtsPage() {
-  
+
 
   // ✅ NEW (same as PantsPage)
   const [searchParams] = useSearchParams();
@@ -54,7 +54,7 @@ export function ShirtsPage() {
   }
 
   // SIZE
- if (selectedSize !== "all") {
+  if (selectedSize !== "all") {
     filtered = filtered.filter((p) =>
       p.sizes?.includes(selectedSize)
     );
@@ -64,19 +64,19 @@ export function ShirtsPage() {
 
   // PRICE
   if (priceRange !== "all") {
-  filtered = filtered.filter((p) => {
-    const price = p.offerprice || p.price;
+    filtered = filtered.filter((p) => {
+      const price = p.offerprice || p.price;
 
-    if (priceRange === "under1000") return price < 1000;
+      if (priceRange === "under1000") return price < 1000;
 
-    if (priceRange === "1000-2000")
-      return price >= 1000 && price <= 2000;
+      if (priceRange === "1000-2000")
+        return price >= 1000 && price <= 2000;
 
-    if (priceRange === "above2000") return price > 2000;
+      if (priceRange === "above2000") return price > 2000;
 
-    return false; // ✅ IMPORTANT (not true)
-  });
-}
+      return false; // ✅ IMPORTANT (not true)
+    });
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -116,13 +116,13 @@ export function ShirtsPage() {
 
         {/* PRODUCTS */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {filtered.map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
               >
                 <ProductCard product={product} />
               </motion.div>
@@ -130,7 +130,7 @@ export function ShirtsPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-2xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground">
               No products found with the selected filters
             </p>
           </div>

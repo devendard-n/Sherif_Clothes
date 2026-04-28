@@ -71,20 +71,20 @@ export function PantsPage() {
   }
 
   // PRICE
-   if (priceRange !== "all") {
-  filtered = filtered.filter((p) => {
-    const price = p.offerprice || p.price;
+  if (priceRange !== "all") {
+    filtered = filtered.filter((p) => {
+      const price = p.offerprice || p.price;
 
-    if (priceRange === "under1000") return price < 1000;
+      if (priceRange === "under1000") return price < 1000;
 
-    if (priceRange === "1000-2000")
-      return price >= 1000 && price <= 2000;
+      if (priceRange === "1000-2000")
+        return price >= 1000 && price <= 2000;
 
-    if (priceRange === "above2000") return price > 2000;
+      if (priceRange === "above2000") return price > 2000;
 
-    return false; // ✅ IMPORTANT (not true)
-  });
-}
+      return false; // ✅ IMPORTANT (not true)
+    });
+  }
 
 
   return (
@@ -111,7 +111,7 @@ export function PantsPage() {
 
         {/* FILTERS */}
         <ProductFilters
-        products={products}
+          products={products}
           subcategories={Object.keys(subcategories)}
           selectedSub={selectedSub}
           setSelectedSub={setSelectedSub}
@@ -125,7 +125,7 @@ export function PantsPage() {
 
         {/* PRODUCTS */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {filtered.map((product) => (
               <motion.div key={product.id}>
                 <ProductCard product={product} />
@@ -134,7 +134,7 @@ export function PantsPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-2xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground">
               No products found with the selected filters
             </p>
           </div>
