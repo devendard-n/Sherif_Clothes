@@ -138,7 +138,6 @@ export function TShirtPage() {
             </p>
           </div>
         )}
-
       </div>
     </div>
   );
