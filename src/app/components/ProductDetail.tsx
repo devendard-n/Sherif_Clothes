@@ -141,40 +141,7 @@ Product Link: ${window.location.href}`;
               )}
             </div>
 
-            {/* 🔥 SIZES */}
-            {product.sizes?.length > 0 && (
-              <div className="mt-4">
-                <h3 className="mb-2 font-semibold">Select Size</h3>
-
-                <div className="flex gap-2 flex-wrap">
-                  {product.sizes.map((size: string) => {
-                    const qty = product.size_stock?.[size] ?? 0;
-                    const isOut = qty === 0;
-
-                    return (
-                      <button
-                        key={size}
-                        disabled={isOut}
-                        onClick={() => !isOut && setSelectedSize(size)}
-                        className={`px-4 py-2 border rounded-lg transition
-              ${selectedSize === size
-                            ? "bg-[var(--gold)] text-[var(--luxury-green)]"
-                            : ""
-                          }
-              ${isOut
-                            ? "opacity-50 cursor-not-allowed line-through"
-                            : "hover:bg-muted"
-                          }
-            `}
-                      >
-                        {size}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
+            
             {/* 🔥 COLORS */}
             {product.colors?.length > 0 && (
               <div className="mt-6">

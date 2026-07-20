@@ -37,23 +37,6 @@ export function ProductCard({ product }: ProductCardProps) {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
 
-          <div className="absolute top-4 left-4 flex flex-col space-y-2">
-            {product.badge && (
-              <div className="bg-[var(--gold)] text-[var(--luxury-green)] px-3 py-1 rounded-full text-xs font-bold tracking-wider">
-                {product.badge}
-              </div>
-            )}
-            {isLowStock && !isOutOfStock && (
-              <div className="bg-[var(--gold)] text-[var(--luxury-green)] px-3 py-1 rounded-full text-xs font-bold">
-                Only {product.stock} left
-              </div>
-            )}
-            {isOutOfStock && (
-              <div className="bg-destructive text-white px-3 py-1 rounded-full text-xs font-bold">
-                OUT OF STOCK
-              </div>
-            )}
-          </div>
 
           <div className="absolute inset-0 bg-[var(--luxury-green)]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <motion.div
