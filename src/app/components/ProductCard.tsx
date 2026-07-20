@@ -78,34 +78,6 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          {/* SIZES */}
-          {product.sizes?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {product.sizes.slice(0, 4).map((size: string) => (
-                <span
-                  key={size}
-                  className="px-2 py-1 text-xs border rounded"
-                >
-                  {size}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center space-x-2 mb-4">
-            <div
-              className={`w-2 h-2 rounded-full ${isOutOfStock
-                ? "bg-destructive"
-                : isLowStock
-                  ? "bg-[var(--gold)]"
-                  : "bg-green-500"
-                }`}
-            />
-            <span className="text-sm text-muted-foreground">
-              {isOutOfStock ? "Out of Stock" : "In Stock"}
-            </span>
-          </div>
-
 
         </div>
       </Link>
