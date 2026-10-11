@@ -292,6 +292,30 @@ function ProductForm({ product, onSave, onCancel }: any) {
     tshirts: ["Drop-shoulder", "graphic", "plain", "polo", "full-sleeve"],
   };
 
+  // Clothing size choices depend on the product category.
+  const sizeOptions =
+    formData.category === "pants"
+      ? ["28", "30", "32", "34", "36", "38", "40"]
+      : ["XS", "S", "M", "L", "XL", "XXL"];
+
+  const toggleSize = (size: string, checked: boolean) => {
+    const currentSizes: string[] = formData.sizes || [];
+    const sizes = checked
+      ? Array.from(new Set([...currentSizes, size]))
+      : currentSizes.filter((currentSize: string) => currentSize !== size);
+
+    const size_stock = { ...(formData.size_stock || {}) };
+    if (checked) {
+      if (size_stock[size] === undefined || size_stock[size] === null) {
+        size_stock[size] = 0;
+      }
+    } else {
+      delete size_stock[size];
+    }
+
+    setFormData({ ...formData, sizes, size_stock });
+  };
+
   const handleImageUpload = async (e: any) => {
     const files = e.target.files;
     if (!files) return;
@@ -318,7 +342,7 @@ function ProductForm({ product, onSave, onCancel }: any) {
 
     setFormData({
       ...formData,
-      images: [...formData.images, ...urls], // ✅ append images
+      images: [...(formData.images || []), ...urls], // append uploaded images
     });
 
     setUploading(false);
@@ -390,13 +414,94 @@ function ProductForm({ product, onSave, onCancel }: any) {
         <input
           type="number"
           placeholder="Price"
+          value={formData.price ?? 0}
           onChange={(e) =>
             setFormData({ ...formData, price: Number(e.target.value) })
           }
           className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
         />
         
-        {/* PRODUCT DISCRIPTION */}
+        {/* SIZE OPTIONS AND SIZE-WISE STOCK */}
+        <div className="col-span-2 space-y-4 rounded-lg border border-white/15 p-4">
+          <div>
+            <label className="block mb-3 text-sm font-semibold text-white">
+              Available Sizes
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {sizeOptions.map((size) => {
+                const selected = (formData.sizes || []).includes(size);
+
+                return (
+                  <label
+                    key={size}
+                    className={`flex items-center gap-2 rounded-lg border px-4 py-3 cursor-pointer transition-colors ${
+                      selected
+                        ? "border-yellow-400 bg-yellow-400/10"
+                        : "border-white/20 hover:border-white/40"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={(e) => toggleSize(size, e.target.checked)}
+                    />
+                    <span className="font-medium text-white">{size}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs text-white/60">
+              {formData.category === "pants"
+                ? "Choose waist sizes for pants."
+                : "Choose clothing sizes available for this product."}
+            </p>
+          </div>
+
+          {(formData.sizes || []).length > 0 && (
+            <div>
+              <label className="block mb-3 text-sm font-semibold text-white">
+                Stock Quantity for Each Size
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {(formData.sizes || []).map((size: string) => (
+                  <div key={size} className="space-y-2">
+                    <label className="block text-sm text-white/80">
+                      Size {size}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      value={formData.size_stock?.[size] ?? 0}
+                      onChange={(e) => {
+                        const rawValue = e.target.value;
+                        const quantity = rawValue === ""
+                          ? 0
+                          : Math.max(0, Math.floor(Number(rawValue) || 0));
+
+                        setFormData({
+                          ...formData,
+                          size_stock: {
+                            ...(formData.size_stock || {}),
+                            [size]: quantity,
+                          },
+                        });
+                      }}
+                      className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-white/70">
+                Total stock: {Object.values(formData.size_stock || {}).reduce(
+                  (sum: number, quantity: any) => sum + Number(quantity || 0),
+                  0
+                )}
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* DESCRIPTION */}
         <textarea
