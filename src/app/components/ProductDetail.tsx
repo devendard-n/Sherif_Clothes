@@ -62,7 +62,7 @@ Price: ₹${product.offerprice || product.price}
 Product Link: ${window.location.href}`;
 
     window.open(
-      `https://wa.me/9003091927?text=${encodeURIComponent(message)}`
+      `https://wa.me/919003091927?text=${encodeURIComponent(message)}`
     );
   };
   // Size Stock check
