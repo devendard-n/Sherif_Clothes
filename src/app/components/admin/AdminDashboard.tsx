@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useTheme } from "../../contexts/ThemeContext";
 import {
@@ -9,22 +8,20 @@ import {
   LogOut,
   Package,
   Image as ImageIcon,
-  DollarSign,
+  X,
 } from "lucide-react";
 import { supabase } from "../../../supabase";
 
 export function AdminDashboard() {
-
   const navigate = useNavigate();
+
   const [products, setProducts] = useState<any[]>([]);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
-  // ✅ FILTER STATE
   const [filterCategory, setFilterCategory] = useState("");
   const [filterFeatured, setFilterFeatured] = useState("");
 
   useEffect(() => {
-    // ✅ AUTH CHECK
     const isAuth = localStorage.getItem("sherif-admin-auth") === "true";
 
     if (!isAuth) {
@@ -32,225 +29,315 @@ export function AdminDashboard() {
       return;
     }
 
-    fetchProducts();
+    void fetchProducts();
   }, [navigate]);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase.from("products").select("*");
-    if (error) console.error(error);
-    else setProducts(data || []);
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (error) {
+      console.error("Failed to fetch products:", error);
+      alert(error.message);
+      return;
+    }
+
+    setProducts(data || []);
   };
 
   const handleLogout = async () => {
-    // ✅ CLEAR LOCAL AUTH
     localStorage.removeItem("sherif-admin-auth");
-
     await supabase.auth.signOut();
     navigate("/admin/login");
   };
 
   const handleDeleteProduct = async (id: number) => {
-    if (window.confirm("Delete this product?")) {
-      await supabase.from("products").delete().eq("id", id);
-      fetchProducts();
+    if (!window.confirm("Are you sure you want to delete this product?")) {
+      return;
     }
+
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      alert(`Failed to delete product: ${error.message}`);
+      return;
+    }
+
+    await fetchProducts();
   };
 
   const handleToggleOffer = async (product: any) => {
-    await supabase
+    const { error } = await supabase
       .from("products")
       .update({
-        offerprice: product.offerprice ? null : product.price - 200,
+        offerprice: product.offerprice
+          ? null
+          : Math.max(0, Number(product.price) - 200),
       })
       .eq("id", product.id);
 
-    fetchProducts();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await fetchProducts();
   };
 
   const handleToggleFeatured = async (product: any) => {
-    await supabase
+    const { error } = await supabase
       .from("products")
       .update({ is_featured: !product.is_featured })
       .eq("id", product.id);
 
-    fetchProducts();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await fetchProducts();
   };
 
-  const filteredProducts = products.filter((p) => {
+  const filteredProducts = products.filter((product) => {
     const categoryMatch =
-      !filterCategory || p.category === filterCategory;
+      !filterCategory || product.category === filterCategory;
 
     const featuredMatch =
       !filterFeatured ||
-      String(p.is_featured) === filterFeatured;
+      String(Boolean(product.is_featured)) === filterFeatured;
 
     return categoryMatch && featuredMatch;
   });
 
+  const closeProductForm = () => {
+    setIsAddingProduct(false);
+    setEditingProduct(null);
+  };
+
+  const handleSaveProduct = async (product: any) => {
+    const sizeStock = product.size_stock || {};
+
+    const totalStock = Object.values(sizeStock).reduce(
+      (total: number, quantity: any) =>
+        total + Math.max(0, Number(quantity) || 0),
+      0
+    );
+
+    const finalProduct = {
+      ...product,
+      images: product.images || [],
+      sizes: product.sizes || [],
+      size_stock: sizeStock,
+      stock: totalStock,
+    };
+
+    let error;
+
+    if (editingProduct) {
+      const result = await supabase
+        .from("products")
+        .update(finalProduct)
+        .eq("id", finalProduct.id);
+
+      error = result.error;
+    } else {
+      const newProduct = { ...finalProduct };
+      delete newProduct.id;
+
+      const result = await supabase
+        .from("products")
+        .insert([newProduct]);
+
+      error = result.error;
+    }
+
+    if (error) {
+      alert(`Failed to save product: ${error.message}`);
+      return;
+    }
+
+    await fetchProducts();
+    closeProductForm();
+    alert("Product saved successfully!");
+  };
+
   return (
-
-    <div className="min-h-screen pt-24 pb-16 ">
+    <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4">
-
-        <div className="mb-12 flex justify-between items-center">
+        {/* HEADER */}
+        <div className="mb-10 flex flex-wrap justify-between items-center gap-5">
           <div>
             <h1 className="text-4xl font-black">ADMIN DASHBOARD</h1>
-            <p className="text-muted-foreground">
-              Manage your products
+            <p className="text-muted-foreground mt-2">
+              Manage your products, images, and stock.
             </p>
           </div>
 
-          <div className="flex gap-4 mb-6">
-
-            <select
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-4 py-2 border rounded "
-            >
-              <option value="" className="bg-black text-base text-white">All Categories</option>
-              <option value="shirts" className="bg-black text-base text-white">Shirts</option>
-              <option value="pants" className="bg-black text-base text-white">Pants</option>
-              <option value="tshirts" className="bg-black text-base text-white">T-Shirts</option>
-            </select>
-
-            <select
-              onChange={(e) => setFilterFeatured(e.target.value)}
-              className="px-4 py-2 border rounded"
-            >
-              <option value="" className="bg-black text-base text-white">All</option>
-              <option value="true" className="bg-black text-base text-white">Featured</option>
-              <option value="false" className="bg-black text-base text-white">Normal</option>
-            </select>
-
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3">
             <button
+              type="button"
               onClick={() => {
-                setIsAddingProduct(true);
                 setEditingProduct(null);
+                setIsAddingProduct(true);
               }}
-              className="bg-[var(--gold)] px-6 py-3 rounded-lg font-bold"
+              className="flex items-center gap-2 bg-[var(--gold)] text-black px-5 py-3 rounded-lg font-bold"
             >
-              + ADD PRODUCT
+              <Plus className="w-5 h-5" />
+              ADD PRODUCT
             </button>
 
             <button
+              type="button"
               onClick={handleLogout}
-              className="bg-red-500 text-white px-6 py-3 rounded-lg"
+              className="flex items-center gap-2 bg-red-600 text-white px-5 py-3 rounded-lg"
             >
+              <LogOut className="w-5 h-5" />
               LOGOUT
             </button>
           </div>
         </div>
 
-        {/* TABLE */}
-        <table className="w-full border">
-          <thead className="bg-black text-yellow-400">
-            <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Offer</th>
-              <th>Featured</th>
-              <th>Stock</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+        {/* FILTERS */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <select
+            value={filterCategory}
+            onChange={(event) => setFilterCategory(event.target.value)}
+            className="px-4 py-3 border rounded-lg bg-transparent"
+          >
+            <option value="">All Categories</option>
+            <option value="shirts">Shirts</option>
+            <option value="pants">Pants</option>
+            <option value="tshirts">T-Shirts</option>
+            <option value="combos">Combos</option>
+          </select>
 
-          <tbody>
-            {filteredProducts.map((p) => (
-              <tr key={p.id} className="border-t">
-                <td>
-                  <img src={p.images?.[0]} className="w-16 h-16" />
-                </td>
+          <select
+            value={filterFeatured}
+            onChange={(event) => setFilterFeatured(event.target.value)}
+            className="px-4 py-3 border rounded-lg bg-transparent"
+          >
+            <option value="">All Products</option>
+            <option value="true">Featured</option>
+            <option value="false">Normal</option>
+          </select>
+        </div>
 
-                <td>{p.name}</td>
-
-                <td>
-                  {p.category} / {p.subcategory}
-                </td>
-
-                <td>₹{p.price}</td>
-
-                <td>
-                  <button onClick={() => handleToggleOffer(p)}>
-                    {p.offerprice ? "Active" : "Inactive"}
-                  </button>
-                </td>
-
-                <td>
-                  <button onClick={() => handleToggleFeatured(p)}>
-                    {p.is_featured ? "⭐ Featured" : "Normal"}
-                  </button>
-                </td>
-
-
-                <td>
-                  <button onClick={() => setEditingProduct(p)}>✏️</button>
-                  <button onClick={() => handleDeleteProduct(p.id)}>🗑</button>
-                </td>
+        {/* PRODUCT TABLE */}
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-left">
+            <thead className="bg-black text-yellow-400">
+              <tr>
+                <th className="p-3">Image</th>
+                <th className="p-3">Name</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Price</th>
+                <th className="p-3">Offer</th>
+                <th className="p-3">Featured</th>
+                <th className="p-3">Stock</th>
+                <th className="p-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
 
+            <tbody>
+              {filteredProducts.map((product) => (
+                <tr key={product.id} className="border-t">
+                  <td className="p-3">
+                    <img
+                      src={product.images?.[0] || "/placeholder.jpg"}
+                      alt={product.name}
+                      className="w-16 h-16 rounded object-cover"
+                    />
+                    <span className="text-xs text-muted-foreground">
+                      {product.images?.length || 0} image(s)
+                    </span>
+                  </td>
+
+                  <td className="p-3">{product.name}</td>
+
+                  <td className="p-3">
+                    {product.category}
+                    {product.subcategory
+                      ? ` / ${product.subcategory}`
+                      : ""}
+                  </td>
+
+                  <td className="p-3">₹{product.price}</td>
+
+                  <td className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleOffer(product)}
+                      className="underline"
+                    >
+                      {product.offerprice ? "Active" : "Inactive"}
+                    </button>
+                  </td>
+
+                  <td className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => void handleToggleFeatured(product)}
+                    >
+                      {product.is_featured ? "⭐ Featured" : "Normal"}
+                    </button>
+                  </td>
+
+                  <td className="p-3">
+                    {Number(product.stock) || 0}
+                  </td>
+
+                  <td className="p-3">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        title="Edit product"
+                        onClick={() => setEditingProduct(product)}
+                        className="text-yellow-400"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Delete product"
+                        onClick={() => void handleDeleteProduct(product.id)}
+                        className="text-red-500"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="p-8 text-center text-muted-foreground"
+                  >
+                    No products found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* PRODUCT FORM */}
         {(isAddingProduct || editingProduct) && (
-          <div className="fixed inset-0 z-50 bg-[#021814]">
-
-            {/* CLOSE ON BACKGROUND CLICK */}
-            <div
-              className="absolute inset-0"
-              onClick={() => {
-                setIsAddingProduct(false);
-                setEditingProduct(null);
-              }}
-            />
-
-            {/* FORM */}
-            <div className="relative z-50 w-full h-full">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-3 sm:p-6">
+            <div className="min-h-full flex items-start justify-center py-5">
               <ProductForm
+                key={editingProduct?.id ?? "new-product"}
                 product={editingProduct}
-                onSave={async (product: any) => {
-
-                  // ✅ CALCULATE TOTAL STOCK
-                  const totalStock = Object.values(product.size_stock || {})
-                    .reduce((sum: number, val: any) => sum + Number(val || 0), 0);
-
-                  const finalProduct = {
-                    ...product,
-                    stock: totalStock, // ✅ SYNC STOCK
-                  };
-
-                  let result;
-
-                  if (editingProduct) {
-                    result = await supabase
-                      .from("products")
-                      .update(finalProduct)
-                      .eq("id", finalProduct.id);
-                  } else {
-                    const newProduct = { ...finalProduct };
-                    delete newProduct.id;
-
-                    result = await supabase
-                      .from("products")
-                      .insert([newProduct]);
-                  }
-
-                  if (result.error) {
-                    alert(result.error.message);
-                    return;
-                  }
-
-                  fetchProducts();
-                  setIsAddingProduct(false);
-                  setEditingProduct(null);
-                }}
-                onCancel={() => {
-                  setIsAddingProduct(false);
-                  setEditingProduct(null);
-                }}
+                onSave={handleSaveProduct}
+                onCancel={closeProductForm}
               />
             </div>
           </div>
@@ -260,358 +347,622 @@ export function AdminDashboard() {
   );
 }
 
-/* ================= PRODUCT FORM ================= */
+/* ======================================================
+   PRODUCT FORM
+====================================================== */
 
-function ProductForm({ product, onSave, onCancel }: any) {
-  const { theme } = useTheme();
+function ProductForm({
+  product,
+  onSave,
+  onCancel,
+}: {
+  product: any;
+  onSave: (product: any) => Promise<void>;
+  onCancel: () => void;
+}) {
+  useTheme();
 
-  const [formData, setFormData] = useState(
-    product || {
-      description: "",
-      name: "",
-      category: "shirts",
-      subcategory: "",
-      price: 0,
-      stock: 0,
-      images: [],
-      is_featured: false,
-      is_trending: false,
-      badge: "",
-      colors: [],
-      sizes: [],
-      size_stock: {},
-    }
-  );
+  const [formData, setFormData] = useState<any>(() => ({
+    description: product?.description || "",
+    name: product?.name || "",
+    category: product?.category || "shirts",
+    subcategory: product?.subcategory || "",
+    price: product?.price ?? 0,
+    offerprice: product?.offerprice ?? null,
+    stock: product?.stock ?? 0,
+    images: Array.isArray(product?.images) ? [...product.images] : [],
+    is_featured: product?.is_featured ?? false,
+    is_trending: product?.is_trending ?? false,
+    badge: product?.badge || "",
+    colors: product?.colors || [],
+    sizes: product?.sizes || [],
+    size_stock: product?.size_stock || {},
+    ...(product?.id !== undefined ? { id: product.id } : {}),
+  }));
 
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const subcategories: any = {
+  const subcategories: Record<string, string[]> = {
     shirts: ["baggy", "Drop-shoulder", "formal", "unique"],
     pants: ["jeans", "cargo", "formal", "baggy", "mom-fit"],
     combos: ["summer", "winter"],
     tshirts: ["Drop-shoulder", "graphic", "plain", "polo", "full-sleeve"],
   };
 
-  // Clothing size choices depend on the product category.
   const sizeOptions =
     formData.category === "pants"
       ? ["28", "30", "32", "34", "36", "38", "40"]
       : ["XS", "S", "M", "L", "XL", "XXL"];
 
-  const toggleSize = (size: string, checked: boolean) => {
-    const currentSizes: string[] = formData.sizes || [];
-    const sizes = checked
-      ? Array.from(new Set([...currentSizes, size]))
-      : currentSizes.filter((currentSize: string) => currentSize !== size);
-
-    const size_stock = { ...(formData.size_stock || {}) };
-    if (checked) {
-      if (size_stock[size] === undefined || size_stock[size] === null) {
-        size_stock[size] = 0;
-      }
-    } else {
-      delete size_stock[size];
-    }
-
-    setFormData({ ...formData, sizes, size_stock });
+  const updateField = (field: string, value: any) => {
+    setFormData((current: any) => ({
+      ...current,
+      [field]: value,
+    }));
   };
 
-  const handleImageUpload = async (e: any) => {
-    const files = e.target.files;
-    if (!files) return;
+  const toggleSize = (size: string, checked: boolean) => {
+    setFormData((current: any) => {
+      const currentSizes: string[] = current.sizes || [];
+
+      const sizes = checked
+        ? Array.from(new Set([...currentSizes, size]))
+        : currentSizes.filter((item) => item !== size);
+
+      const size_stock = { ...(current.size_stock || {}) };
+
+      if (checked) {
+        if (size_stock[size] === undefined) {
+          size_stock[size] = 0;
+        }
+      } else {
+        delete size_stock[size];
+      }
+
+      return { ...current, sizes, size_stock };
+    });
+  };
+
+  /* UPLOAD IMAGE TO SUPABASE STORAGE */
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      return null;
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const fileName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}-${safeName}`;
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, file);
+
+    if (error) {
+      console.error("Image upload failed:", error);
+      alert(`Image upload failed: ${error.message}`);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
+  /* ADD MULTIPLE IMAGES */
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
+
+    if (files.length === 0) return;
 
     setUploading(true);
 
-    let urls: string[] = [];
+    try {
+      const uploadedUrls: string[] = [];
 
-    for (let file of files) {
-      const fileName = `${Date.now()}-${file.name}`;
-
-      const { error } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, file);
-
-      if (!error) {
-        const { data } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(fileName);
-
-        urls.push(data.publicUrl);
+      for (const file of files) {
+        const url = await uploadImageFile(file);
+        if (url) uploadedUrls.push(url);
       }
+
+      if (uploadedUrls.length > 0) {
+        setFormData((current: any) => ({
+          ...current,
+          images: [...(current.images || []), ...uploadedUrls],
+        }));
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert("An error occurred while uploading images.");
+    } finally {
+      setUploading(false);
     }
-
-    setFormData({
-      ...formData,
-      images: [...(formData.images || []), ...urls], // append uploaded images
-    });
-
-    setUploading(false);
   };
 
-  return (
-    <div className="bg-[#fff] border border-yellow-500/40 rounded-2xl p-8 w-full max-w-3xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto bg-[var(--luxury-green)] text-white">
+  /* REPLACE A SPECIFIC IMAGE */
+  const handleReplaceImage = async (index: number, file?: File) => {
+    if (!file) return;
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold tracking-wide text-white">
-          {product ? "EDIT PRODUCT" : "ADD PRODUCT"}
-        </h2>
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const newUrl = await uploadImageFile(file);
+
+      if (!newUrl) return;
+
+      setFormData((current: any) => {
+        const images = [...(current.images || [])];
+
+        if (index < images.length) {
+          images[index] = newUrl;
+        }
+
+        return { ...current, images };
+      });
+    } catch (error) {
+      console.error("Image replacement failed:", error);
+      alert("Unable to replace this image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  /* REMOVE IMAGE FROM PRODUCT */
+  const handleRemoveImage = (index: number) => {
+    const confirmed = window.confirm(
+      "Remove this image from the product? Save the product to confirm this change."
+    );
+
+    if (!confirmed) return;
+
+    setFormData((current: any) => ({
+      ...current,
+      images: (current.images || []).filter(
+        (_: string, imageIndex: number) => imageIndex !== index
+      ),
+    }));
+  };
+
+  /* SAVE PRODUCT */
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (uploading || saving) return;
+
+    if (!formData.name.trim()) {
+      alert("Please enter a product name.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await onSave(formData);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const totalStock = Object.values(formData.size_stock || {}).reduce(
+    (total: number, quantity: any) =>
+      total + Math.max(0, Number(quantity) || 0),
+    0
+  );
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-4xl rounded-2xl border border-yellow-500/40 bg-[var(--luxury-green)] p-5 sm:p-8 text-white shadow-2xl"
+    >
+      {/* FORM HEADER */}
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">
+            {product ? "EDIT PRODUCT" : "ADD PRODUCT"}
+          </h2>
+          <p className="mt-1 text-sm text-white/60">
+            Manage product details, photos, and stock.
+          </p>
+        </div>
+
         <button
+          type="button"
           onClick={onCancel}
-          className="text-white/60 hover:text-white text-xl"
+          aria-label="Close product form"
+          className="rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white"
         >
-          ✕
+          <X className="h-6 w-6" />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-        {/* NAME */}
-        <input
-          placeholder="Product Name"
-          value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
-          className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
-        />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        {/* PRODUCT NAME */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Product Name
+          </label>
+          <input
+            required
+            value={formData.name}
+            onChange={(event) => updateField("name", event.target.value)}
+            placeholder="Product name"
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          />
+        </div>
 
         {/* CATEGORY */}
-        <select
-          value={formData.category}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              category: e.target.value,
-              subcategory: "",
-            })
-          }
-          className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
-        >
-          <option value="shirts" className="bg-black text-base text-white">Shirts</option>
-          <option value="pants" className="bg-black text-base text-white">Pants</option>
-          <option value="combos" className="bg-black text-base text-white">Combos</option>
-          <option value="tshirts" className="bg-black text-base text-white">T-Shirts</option>
-        </select>
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Category
+          </label>
+          <select
+            value={formData.category}
+            onChange={(event) =>
+              setFormData((current: any) => ({
+                ...current,
+                category: event.target.value,
+                subcategory: "",
+              }))
+            }
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          >
+            <option value="shirts" className="bg-black">Shirts</option>
+            <option value="pants" className="bg-black">Pants</option>
+            <option value="combos" className="bg-black">Combos</option>
+            <option value="tshirts" className="bg-black">T-Shirts</option>
+          </select>
+        </div>
 
         {/* SUBCATEGORY */}
-        <select
-          value={formData.subcategory}
-          onChange={(e) =>
-            setFormData({ ...formData, subcategory: e.target.value })
-          }
-          className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
-        >
-          <option value="" className="bg-black text-base text-white">Select Subcategory</option>
-          {subcategories[formData.category]?.map((sub: string) => (
-            <option key={sub} value={sub} className="bg-black text-base text-white">
-              {sub}
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Subcategory
+          </label>
+          <select
+            value={formData.subcategory}
+            onChange={(event) =>
+              updateField("subcategory", event.target.value)
+            }
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          >
+            <option value="" className="bg-black">
+              Select Subcategory
             </option>
-          ))}
-        </select>
+            {(subcategories[formData.category] || []).map((subcategory) => (
+              <option
+                key={subcategory}
+                value={subcategory}
+                className="bg-black"
+              >
+                {subcategory}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* PRICE */}
-        <input
-          type="number"
-          placeholder="Price"
-          value={formData.price ?? 0}
-          onChange={(e) =>
-            setFormData({ ...formData, price: Number(e.target.value) })
-          }
-          className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400"
-        />
-        
-        {/* SIZE OPTIONS AND SIZE-WISE STOCK */}
-        <div className="col-span-2 space-y-4 rounded-lg border border-white/15 p-4">
-          <div>
-            <label className="block mb-3 text-sm font-semibold text-white">
-              Available Sizes
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {sizeOptions.map((size) => {
-                const selected = (formData.sizes || []).includes(size);
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Price (₹)
+          </label>
+          <input
+            type="number"
+            min="0"
+            required
+            value={formData.price}
+            onChange={(event) =>
+              updateField("price", Number(event.target.value))
+            }
+            placeholder="Price"
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          />
+        </div>
 
-                return (
-                  <label
-                    key={size}
-                    className={`flex items-center gap-2 rounded-lg border px-4 py-3 cursor-pointer transition-colors ${
-                      selected
-                        ? "border-yellow-400 bg-yellow-400/10"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={(e) => toggleSize(size, e.target.checked)}
-                    />
-                    <span className="font-medium text-white">{size}</span>
-                  </label>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-xs text-white/60">
-              {formData.category === "pants"
-                ? "Choose waist sizes for pants."
-                : "Choose clothing sizes available for this product."}
-            </p>
+        {/* SIZE-WISE STOCK */}
+        <div className="sm:col-span-2 rounded-lg border border-white/15 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Package className="h-5 w-5 text-yellow-400" />
+            <h3 className="font-semibold">Available Sizes and Stock</h3>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {sizeOptions.map((size) => {
+              const selected = (formData.sizes || []).includes(size);
+
+              return (
+                <label
+                  key={size}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 ${
+                    selected
+                      ? "border-yellow-400 bg-yellow-400/10"
+                      : "border-white/20"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={(event) =>
+                      toggleSize(size, event.target.checked)
+                    }
+                  />
+                  <span>{size}</span>
+                </label>
+              );
+            })}
           </div>
 
           {(formData.sizes || []).length > 0 && (
-            <div>
-              <label className="block mb-3 text-sm font-semibold text-white">
-                Stock Quantity for Each Size
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {(formData.sizes || []).map((size: string) => (
-                  <div key={size} className="space-y-2">
-                    <label className="block text-sm text-white/80">
+            <div className="mt-5">
+              <h4 className="mb-3 text-sm font-semibold">
+                Quantity per Size
+              </h4>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {formData.sizes.map((size: string) => (
+                  <div key={size}>
+                    <label className="mb-1 block text-sm text-white/70">
                       Size {size}
                     </label>
                     <input
                       type="number"
                       min="0"
                       step="1"
-                      inputMode="numeric"
                       value={formData.size_stock?.[size] ?? 0}
-                      onChange={(e) => {
-                        const rawValue = e.target.value;
-                        const quantity = rawValue === ""
-                          ? 0
-                          : Math.max(0, Math.floor(Number(rawValue) || 0));
+                      onChange={(event) => {
+                        const value = Math.max(
+                          0,
+                          Math.floor(Number(event.target.value) || 0)
+                        );
 
-                        setFormData({
-                          ...formData,
+                        setFormData((current: any) => ({
+                          ...current,
                           size_stock: {
-                            ...(formData.size_stock || {}),
-                            [size]: quantity,
+                            ...(current.size_stock || {}),
+                            [size]: value,
                           },
-                        });
+                        }));
                       }}
-                      className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
+                      className="w-full rounded-lg border border-white/20 bg-transparent px-3 py-2 outline-none focus:border-yellow-400"
                     />
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-sm text-white/70">
-                Total stock: {Object.values(formData.size_stock || {}).reduce(
-                  (sum: number, quantity: any) => sum + Number(quantity || 0),
-                  0
-                )}
+
+              <p className="mt-4 text-sm font-semibold text-yellow-300">
+                Total stock: {totalStock}
               </p>
             </div>
           )}
         </div>
 
         {/* DESCRIPTION */}
-        <textarea
-          placeholder="Product Description"
-          value={formData.description || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="col-span-2 w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg focus:border-yellow-400 outline-none"
-          rows={3}
-        />
+        <div className="sm:col-span-2">
+          <label className="mb-2 block text-sm font-semibold">
+            Description
+          </label>
+          <textarea
+            rows={4}
+            value={formData.description || ""}
+            onChange={(event) =>
+              updateField("description", event.target.value)
+            }
+            placeholder="Product description"
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          />
+        </div>
 
-        {/* BADGE + FLAGS */}
-        <div className="col-span-2 flex flex-wrap gap-4 items-center">
+        {/* BADGE */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Product Badge
+          </label>
           <select
             value={formData.badge || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, badge: e.target.value })
-            }
-            className="px-4 py-3 bg-transparent border border-white/20 rounded-lg"
+            onChange={(event) => updateField("badge", event.target.value)}
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3"
           >
-            <option value="" className="bg-black text-base text-white">No Badge</option>
-            <option value="LIMITED" className="bg-black text-base text-white">LIMITED</option>
-            <option value="UNIQUE" className="bg-black text-base text-white">UNIQUE</option>
-            <option value="HOT DEAL" className="bg-black text-base text-white">HOT DEAL</option>
+            <option value="" className="bg-black">No Badge</option>
+            <option value="LIMITED" className="bg-black">LIMITED</option>
+            <option value="UNIQUE" className="bg-black">UNIQUE</option>
+            <option value="HOT DEAL" className="bg-black">HOT DEAL</option>
           </select>
+        </div>
 
-          <label className="flex items-center gap-2 text-sm">
+        {/* OFFER PRICE */}
+        <div>
+          <label className="mb-2 block text-sm font-semibold">
+            Offer Price (optional)
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={formData.offerprice ?? ""}
+            onChange={(event) =>
+              updateField(
+                "offerprice",
+                event.target.value === ""
+                  ? null
+                  : Number(event.target.value)
+              )
+            }
+            placeholder="Offer price"
+            className="w-full rounded-lg border border-white/20 bg-transparent px-4 py-3 outline-none focus:border-yellow-400"
+          />
+        </div>
+
+        {/* PRODUCT FLAGS */}
+        <div className="sm:col-span-2 flex flex-wrap gap-6">
+          <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
-              checked={formData.is_featured || false}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  is_featured: e.target.checked,
-                })
+              checked={Boolean(formData.is_featured)}
+              onChange={(event) =>
+                updateField("is_featured", event.target.checked)
               }
             />
             ⭐ Featured
           </label>
 
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
-              checked={formData.is_trending || false}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  is_trending: e.target.checked,
-                })
+              checked={Boolean(formData.is_trending)}
+              onChange={(event) =>
+                updateField("is_trending", event.target.checked)
               }
             />
             🔥 Trending
           </label>
         </div>
 
-        {/* OFFER PRICE */}
-        <input
-          type="number"
-          placeholder="Offer Price (optional)"
-          value={formData.offerprice || ""}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              offerprice: e.target.value
-                ? Number(e.target.value)
-                : null,
-            })
-          }
-          className="col-span-2 w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg"
-        />
+        {/* ==================================================
+            IMAGE MANAGER
+        ================================================== */}
+        <div className="sm:col-span-2 rounded-xl border border-yellow-400/30 p-4 sm:p-5">
+          <div className="mb-4 flex items-center gap-3">
+            <ImageIcon className="h-6 w-6 text-yellow-400" />
+            <div>
+              <h3 className="text-lg font-bold">Product Images</h3>
+              <p className="text-sm text-white/60">
+                Add, preview, replace, or remove product photos.
+              </p>
+            </div>
+          </div>
 
-        {/* IMAGE */}
-        <div className="col-span-2">
-          <label className="block mb-2 text-sm text-white/70">Product Image</label>
-          <input
-            type="file"
-            multiple
-            onChange={handleImageUpload}
-            className="w-full px-4 py-3 bg-transparent border border-white/20 rounded-lg"
-          />
+          {/* ADD IMAGES */}
+          <label
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg bg-yellow-500 px-4 py-3 font-bold text-black transition hover:bg-yellow-400 ${
+              uploading ? "pointer-events-none opacity-50" : ""
+            }`}
+          >
+            <Plus className="h-5 w-5" />
+            {uploading ? "Uploading..." : "Add Images"}
+
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={uploading}
+              onChange={(event) => void handleImageUpload(event)}
+              className="hidden"
+            />
+          </label>
+
+          {uploading && (
+            <p className="mt-3 text-sm text-yellow-300">
+              Please wait while your images upload...
+            </p>
+          )}
+
+          {/* IMAGE PREVIEWS */}
+          {(formData.images || []).length > 0 ? (
+            <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {formData.images.map((imageUrl: string, index: number) => (
+                <div
+                  key={`${imageUrl}-${index}`}
+                  className="overflow-hidden rounded-lg border border-white/20 bg-black/20"
+                >
+                  <div className="relative">
+                    <img
+                      src={imageUrl}
+                      alt={`Product image ${index + 1}`}
+                      className="h-40 w-full object-cover"
+                    />
+
+                    <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
+                      Image {index + 1}
+                    </span>
+                  </div>
+
+                  <div className="p-2">
+                    {/* REPLACE IMAGE */}
+                    <label
+                      className={`mb-2 flex cursor-pointer items-center justify-center gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/20 ${
+                        uploading ? "pointer-events-none opacity-50" : ""
+                      }`}
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                      Replace
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploading}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          event.target.value = "";
+
+                          if (file) {
+                            void handleReplaceImage(index, file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {/* REMOVE IMAGE */}
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => handleRemoveImage(index)}
+                      className="flex w-full items-center justify-center gap-2 rounded-md bg-red-600/90 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-lg border border-dashed border-white/30 p-8 text-center">
+              <ImageIcon className="mx-auto mb-3 h-10 w-10 text-white/40" />
+              <p className="font-semibold">No product images</p>
+              <p className="mt-1 text-sm text-white/60">
+                Click Add Images to upload photos for this product.
+              </p>
+            </div>
+          )}
+
+          <p className="mt-4 text-xs text-white/50">
+            Image changes are saved when you click Save Product. Removing a
+            photo here removes it from this product's image list, but does not
+            delete the original file from Supabase Storage.
+          </p>
         </div>
-
-        {uploading && <p className="col-span-2">Uploading...</p>}
-
-        {formData.images?.[0] && (
-          <img
-            src={formData.images[0]}
-            className="w-28 h-28 object-cover rounded-lg col-span-2 border border-white/20"
-          />
-        )}
       </div>
 
-      {/* BUTTONS */}
-      <div className="flex gap-4 mt-8">
+      {/* SAVE AND CANCEL */}
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <button
-          onClick={() => onSave(formData)}
-          disabled={uploading}
-          className="flex-1 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:scale-105 transition"
+          type="submit"
+          disabled={uploading || saving}
+          className="flex-1 rounded-lg bg-yellow-500 px-5 py-3 font-bold text-black transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          SAVE
+          {saving ? "SAVING..." : "SAVE PRODUCT"}
         </button>
 
         <button
+          type="button"
           onClick={onCancel}
-          className="flex-1 py-3 bg-white/10 rounded-lg hover:bg-white/20"
+          disabled={saving}
+          className="flex-1 rounded-lg bg-white/10 px-5 py-3 font-semibold hover:bg-white/20 disabled:opacity-50"
         >
           CANCEL
         </button>
       </div>
-    </div>
+    </form>
   );
 }
