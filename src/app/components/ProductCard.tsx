@@ -28,7 +28,6 @@ Link: ${window.location.origin}/product/${product.id}`;
   };
 
   const stock = Math.max(0, Number(product.stock) || 0);
-  const isLowStock = stock > 0 && stock <= 5;
   const isOutOfStock = stock === 0;
 
   return (
@@ -40,20 +39,18 @@ Link: ${window.location.origin}/product/${product.id}`;
       <Link
         to={`/product/${product.id}`}
         aria-label={`${product.name}${isOutOfStock ? ", out of stock" : ""}`}
-        className={`block bg-card border-2 border-transparent rounded-lg overflow-hidden transition-all duration-300 ${
-          isOutOfStock
-            ? "opacity-80 cursor-not-allowed"
-            : "hover:border-[var(--gold)] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
-        }`}
+        className={`block bg-card border-2 border-transparent rounded-lg overflow-hidden transition-all duration-300 ${isOutOfStock
+          ? "opacity-80 cursor-not-allowed"
+          : "hover:border-[var(--gold)] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+          }`}
       >
         {/* Product image */}
         <div className="relative h-80 overflow-hidden bg-muted">
           <img
             src={product.images?.[0] || "/placeholder.jpg"}
             alt={product.name}
-            className={`w-full h-full object-cover transition-transform duration-500 ${
-              isOutOfStock ? "grayscale" : "group-hover:scale-110"
-            }`}
+            className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? "grayscale" : "group-hover:scale-110"
+              }`}
           />
 
           {/* Hover overlay */}
@@ -70,15 +67,11 @@ Link: ${window.location.origin}/product/${product.id}`;
           )}
 
           {/* Stock status badge */}
-          {isOutOfStock ? (
+          {isOutOfStock && (
             <div className="absolute top-3 left-3 rounded-md bg-red-600 px-3 py-2 text-sm font-bold text-white shadow-md">
               Out of Stock
             </div>
-          ) : isLowStock ? (
-            <div className="absolute top-3 left-3 rounded-md bg-orange-500 px-3 py-2 text-sm font-bold text-white shadow-md">
-              Only {stock} left!
-            </div>
-          ) : null}
+          )}
         </div>
 
         {/* Product details */}
@@ -118,10 +111,6 @@ Link: ${window.location.origin}/product/${product.id}`;
             <p className="text-sm font-semibold text-red-600">
               This product is currently unavailable.
             </p>
-          ) : isLowStock ? (
-            <p className="text-sm font-semibold text-orange-500">
-              Hurry! Only {stock} left in stock.
-            </p>
           ) : (
             <p className="text-sm font-medium text-green-600">
               In Stock
@@ -133,11 +122,10 @@ Link: ${window.location.origin}/product/${product.id}`;
             type="button"
             onClick={orderViaWhatsApp}
             disabled={isOutOfStock}
-            className={`mt-4 w-full rounded-md px-4 py-3 font-semibold transition-colors ${
-              isOutOfStock
-                ? "cursor-not-allowed bg-gray-300 text-gray-600"
-                : "bg-[var(--luxury-green)] text-white hover:bg-[var(--gold)] hover:text-black"
-            }`}
+            className={`mt-4 w-full rounded-md px-4 py-3 font-semibold transition-colors ${isOutOfStock
+              ? "cursor-not-allowed bg-gray-300 text-gray-600"
+              : "bg-[var(--luxury-green)] text-white hover:bg-[var(--gold)] hover:text-black"
+              }`}
           >
             {isOutOfStock ? "Out of Stock" : "Order via WhatsApp"}
           </button>
